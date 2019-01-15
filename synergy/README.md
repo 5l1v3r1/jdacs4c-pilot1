@@ -13,7 +13,7 @@ Please let me know (jgans@lanl.gov) if you encounter any problems building or ru
 
 ### Cell line gene expression features
 
-The cell line gene expression features are the RNA Seq RPKM values (provided by the CCLE) for the LINC1000 genes. The CCLE RNA Seq RPKM values are available [here](https://portals.broadinstitute.org/ccle); note that you will need to create an account and login to access the CCLE data. The data file that should be downloaded is called: `CCLE_DepMap_18q3_RNAseq_RPKM_20180718.gct`. 
+The cell line gene expression features are the RNA Seq RPKM values (provided by the CCLE) for the LINC1000 genes. The CCLE RNA Seq RPKM values are available [here](https://data.broadinstitute.org/ccle/CCLE_DepMap_18q3_RNAseq_RPKM_20180718.gct); note that you will need to create an account and login to access the CCLE data. The data file that should be downloaded is called: `CCLE_DepMap_18q3_RNAseq_RPKM_20180718.gct`. (There is already a newer file of RNA Seq RPKM values in the CCLE data respository, so the file listed above is displayed under the "Previous Releases" header on the CCLE data webpage).
 
 The perl script, `jdacs4c-pilot1/synergy/preprocess/CCLE_format_rnaseq.pl`, is provided to format the CCLE data and extract the LINCS100 gene expression values corresponding to the LINCS1000 genes. After downloading the CCLE_DepMap_18q3_RNAseq_RPKM_20180718.gct file, run and redirect the script:
 
