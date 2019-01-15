@@ -13,9 +13,11 @@ Please let me know (jgans@lanl.gov) if you encounter any problems building or ru
 
 ### Cell line gene expression features
 
-The cell line gene expression features are the RNA Seq RPKM values (provided by the CCLE) for the LINC1000 genes. The CCLE RNA Seq RPKM values are available [here](https://portals.broadinstitute.org/ccle); note that you will need to create an account and login to access the CCLE data. The data file that should be downloaded is called: `CCLE_DepMap_18q3_RNAseq_RPKM_20180718.gct`. A perl script, `jdacs4c-pilot1/jason/preprocess/CCLE_format_rnaseq.pl`, is provided to format the CCLE data and extract the LINCS100 gene expression values corresponding to the LINCS1000 genes. After downloading the CCLE_DepMap_18q3_RNAseq_RPKM_20180718.gct file, run and redirect the script:
+The cell line gene expression features are the RNA Seq RPKM values (provided by the CCLE) for the LINC1000 genes. The CCLE RNA Seq RPKM values are available [here](https://portals.broadinstitute.org/ccle); note that you will need to create an account and login to access the CCLE data. The data file that should be downloaded is called: `CCLE_DepMap_18q3_RNAseq_RPKM_20180718.gct`. 
 
-`CCLE_format_rnaseq.pl CCLE_DepMap_18q3_RNAseq_RPKM_20180718.gct > <destination file name>`
+The perl script, `jdacs4c-pilot1/jason/preprocess/CCLE_format_rnaseq.pl`, is provided to format the CCLE data and extract the LINCS100 gene expression values corresponding to the LINCS1000 genes. After downloading the CCLE_DepMap_18q3_RNAseq_RPKM_20180718.gct file, run and redirect the script:
+
+`CCLE_format_rnaseq.pl CCLE_DepMap_18q3_RNAseq_RPKM_20180718.gct > CCLE_DepMap_18q3_RNAseq_RPKM.LINCS1000.tsv`
 
 to produce a tab-delimited file with cell-line samples corresponding to the rows and gene names corresponding to the column. Note that some of the LINCS1000 gene names are not found in the CCLE intput file (which will generate `Failed to match LINCS gene` warnings. However, a total of 958 genes should be matched.
 
@@ -34,15 +36,19 @@ are provided in the file `jdacs4c-pilot1/jason/preprocess/ALMANAC_and_Merck.obab
   
 The NCI-ALMANAC drug-pair synergy data is available from [ComboDrugGrowth_Nov2017.zip](https://wiki.nci.nih.gov/download/attachments/338237347/ComboDrugGrowth_Nov2017.zip). 
 
-The first preprocessing step for the NCI-ALMANAC data is to (a) extract the subset of the data that belongs to one of the CCLE cell lines that will be used and (b) converting the NSC-based drug ID used by NCI-ALMANAC to the CID-based drug ID used to label the drug features. Both of these steps are performed by the `dacs4c-pilot1/jason/preprocess/ALMANAC_to_cid_and_CCLE.pl` perl script. This script contains the hard-coded mappings between NSC <-> CID drug ids and the CCLE <-> NCI60 cell line names. The script is run as:
+The first preprocessing step for the NCI-ALMANAC data is to (a) extract the subset of the data that has expression data in CCLE cell line gene expression data set and (b) converting the NSC-based drug ID used by NCI-ALMANAC to the CID-based drug ID used to label the drug features. Both of these steps are performed by the `dacs4c-pilot1/jason/preprocess/ALMANAC_to_cid_and_CCLE.pl` perl script. This script contains the hard-coded mappings between NSC <-> CID drug ids and the CCLE <-> NCI60 cell line names. The script is run as:
 
 `ALMANAC_to_cid_and_CCLE.pl ComboDrugGrowth_Nov2017.csv > ComboDrugGrowth_Nov2017.CID.CCLE.csv`
 
 where the output (written to STDOUT) is redirected to a filename you select (I used `ComboDrugGrowth_Nov2017.CID.CCLE.csv` in the example above).
 
-The next step of preprocessing the NCI-ALMANAC data is to compute the drug pair synergy values. Since the data file provided by NCI contains both the single agent and drug pair responses (for the different concentrations tested), parsing and processing this file is somewhat challenging. To manage the complexity, this preprocessing step is performed by a C++ - based program called `gemini_prep` that must first be compiled by running the `make` command in the `dacs4c-pilot1/jason/preprocess` directory. 
+The next step of preprocessing the NCI-ALMANAC data is to compute the drug pair synergy values. Since the NCI-ALAMANC data file contains both the single agent and drug pair responses (for the different concentrations tested), parsing and processing this file is somewhat challenging. To manage the parsing complexity, this preprocessing step is performed by a C++ based program called `gemini_prep`. 
 
-However, please note that the `gemini_prep` program requires the [GNU Scientific Library](https://www.gnu.org/software/gsl/), in addition to C++ compiler (the code has been tested with g++ ver. 4.4.7). After installing the GNU Scientific Library, you will need to edit `acs4c-pilot1/jason/preprocess/Makefile` to specify the directories that contain the GSL library files (`GSL_LIB_DIR`) and GSL include files (`GSL_INCLUDE_DIR`). If your compiler does not support OpenMP (i.e. you have a Mac with the stock clang compiler as of 2018) then comment out the `-fopenmp` and the program should still compile (and run more slowly, since multi-threading will now be disabled). After you run `make` (which will build both the `gemini_prep` and another program called `synergy_search` that will be described below), you will be able to run the `gemini_prep` command using:
+However, please note that the `gemini_prep` program requires the [GNU Scientific Library](https://www.gnu.org/software/gsl/), in addition to C++ compiler (the code has been tested with g++ ver. 4.4.7). After installing the GNU Scientific Library, you will need to edit `acs4c-pilot1/jason/preprocess/Makefile` to specify the directories that contain the GSL library files (`GSL_LIB_DIR`) and GSL include files (`GSL_INCLUDE_DIR`). If your compiler does not support OpenMP (i.e. you have a Mac with the stock clang compiler as of 2018) then comment out the `-fopenmp` and the program should still compile (but run more slowly, since multi-threading is now disabled). 
+
+The `gemini_prep` is compiled by running the `make` command in the `dacs4c-pilot1/jason/preprocess` directory. 
+
+After you run `make` (which will build both the `gemini_prep` and another program called `synergy_search` that will be described below), you will be able to run the `gemini_prep` command using:
 
 ```
 ./gemini_prep \
@@ -68,17 +74,17 @@ These files contain the average (over replicate experiments) minimum synergy (i.
 
 ### Merck drug synergy data
 
-The Merck drug-pair synergy data is contained in the supplementary online data for On'Neil et. al. "An Unbiased Oncology Compound Screen to Identify Novel Combination Strategies", Molecular Cancer Therapeutics, 2016 Jun;15(6):1155-62. The single agent response data is stored in one [Excel file](http://mct.aacrjournals.org/highwire/filestream/53222/field_highwire_adjunct_files/1/156849_1_supp_0_w2lh45.xlsx) and the combination response data is stored in another [Excel file](http://mct.aacrjournals.org/highwire/filestream/53222/field_highwire_adjunct_files/3/156849_1_supp_1_w2lrww.xls).
+The Merck drug-pair synergy data is contained in the supplementary online data for O'Neil et. al. "An Unbiased Oncology Compound Screen to Identify Novel Combination Strategies", Molecular Cancer Therapeutics, 2016 Jun;15(6):1155-62. The single agent response data is stored in one [Excel file](http://mct.aacrjournals.org/highwire/filestream/53222/field_highwire_adjunct_files/1/156849_1_supp_0_w2lh45.xlsx) and the combination response data is stored in another [Excel file](http://mct.aacrjournals.org/highwire/filestream/53222/field_highwire_adjunct_files/3/156849_1_supp_1_w2lrww.xls).
 
-To process the Merck data, both the single agent and combination response files must be manually convered to comma delimited files. The provided perl script, `jdacs4c-pilot1/jason/preprocess/process_merck.pl`, converts these files into a single file that contains the most synergistic measurements for each drug pair and cell line tested. This file is run as:
+To process the Merck data, both the single agent and combination response files must be manually convered to comma delimited files. The provided perl script, `jdacs4c-pilot1/jason/preprocess/process_merck.pl`, converts these CSV files (*not* the Excel files!) into a single file that contains the most synergistic measurements for each drug pair and cell line tested. This file is run as:
 
-`./process_merck.pl --single <single agent response CSV file> --pair <combination response CSV file> > <output CSV synergy file>`
+`./process_merck.pl --single <single agent response CSV file> --pair <combination response CSV file> > merck_pair.csv`
 
-where the output (written to STDOUT) must be redirected to a filename you specify.
+where the output (written to STDOUT) must be redirected to a filename you specify (i.e. `merck_pair.csv` in this example).
 
 ### Extract the per-cell line synergy values for both NCI-ALMANAC and Merck
 
-The final preprocessing step for both the NCI-ALMANAC and the Merck datasets is to extract the synergy values for each cell line as a separate file. This task is performed by the `synergy_search` C++ program that should have been built when the `make` command was run in the `acs4c-pilot1/jason/preprocess` directory (see the instructions above for the NCI-ALMANAC data). The process of creating the per-cell line drug-pair synergy files is automated by the provided shell script `batch_synergy_search.sh`. This shell script will create the output synergy files in two directories: `data_bliss/` and `data_loewe/`. If you would like to place these files in a different location, please edit the `OUTPUT_BLISS_DIR` and `OUTPUT_LOEWE_DIR` at the top of the script. This script is run as:
+The final preprocessing step for both the NCI-ALMANAC and the Merck datasets is to extract the synergy values for each cell line as a separate file. This task is performed by the `synergy_search` C++ program that should have been built when the `make` command was run in the `acs4c-pilot1/jason/preprocess` directory (see the instructions above for the NCI-ALMANAC data). The process of creating the per-cell line drug-pair synergy files is automated by the provided shell script `batch_synergy_search.sh`. This shell script expects to create the output synergy files in two existing directories: `data_bliss/` and `data_loewe/`. If you would like to place these files in a different location, please edit the `OUTPUT_BLISS_DIR` and `OUTPUT_LOEWE_DIR` at the top of the script. This script is run as:
 
 `./batch_synergy_sarch.sh`
 
@@ -106,7 +112,7 @@ To build the `predict_synergy` program, run the `make` command in the `jdacs4c-p
 
 # Run the synergy prediction program
 
-As mentioned above, the `predict_synergy` program uses MPI to train and test random forest-based predictive models of drug pair synergy. This requires running the program via the `mpirun` command that is included in all MPI distributions (some cluster scheduling systems may have other ways of launching MPI-based programs).
+As mentioned above, the `predict_synergy` program uses MPI to train and test random forest-based predictive models of drug pair synergy. This requires running the program via the `mpirun` command that is included in all MPI distributions (however, some cluster scheduling systems may have other ways of launching MPI-based programs).
 
 Running the `./predict_synergy` program with out any command line arguments lists all of the valid command line options:
 
