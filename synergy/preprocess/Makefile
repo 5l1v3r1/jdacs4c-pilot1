@@ -8,11 +8,11 @@ OPENMP = -fopenmp
 
 FLAGS = $(PROFILE) -O3 -Wall $(OPENMP) -std=c++0x
 
-# This make file assumes that the GNU Scientific Library is installed
+# This Makefile assumes that the GNU Scientific Library is installed
 # in your home directory in a subdirectory called "gsl". If this is
 # not the case, you will need to edit the "GSL_LIB_DIR" and
-# "GSL_INCLUDE_DIR" variable below to point to the locations that
-# contain the library files and the include files respectively.
+# "GSL_INCLUDE_DIR" variables below to refer to the directories that
+# contain the GSL library files and the GSL include files respectively.
 GSL_LIB_DIR = $(HOME)/gsl/lib
 GSL_INCLUDE_DIR = $(HOME)/gsl/include
 
