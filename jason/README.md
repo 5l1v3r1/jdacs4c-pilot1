@@ -1,9 +1,9 @@
 
 # Documentation and software for the "Predicting drug-pair synergy from the predicted synergy probabilities of individual drugs"
 
-This file provides a high-level overview of the steps needed to reproduce the results in drug-pair synergy publication. The three primary steps are:
+This README provides a high-level overview of the steps needed to reproduce the results in drug-pair synergy publication. The three primary steps are:
 
-1. Download and process the data
+1. Download and process the synergy, gene expression and 2D drug structure data
 2. Build the synergy prediction program
 3. Run the synergy prediction program
 
@@ -21,7 +21,7 @@ The perl script, `jdacs4c-pilot1/jason/preprocess/CCLE_format_rnaseq.pl`, is pro
 
 to produce a tab-delimited file with cell-line samples corresponding to the rows and gene names corresponding to the column. Note that some of the LINCS1000 gene names are not found in the CCLE input file (which will generate `Failed to match LINCS gene` warnings. However, a total of 958 genes should be matched.
 
-### Drug features
+### 2D drug structure features
 
 The drug features are the 1021-bit binary fingerprints computed from desalted, 2D chemical structres using the [OpenBabel program](http://openbabel.org/wiki/Main_Page). The 2D drug structures for both the NCI-ALMANAC and Merck data sets are contained in the `jdacs4c-pilot1/jason/preprocess/ALMANAC_and_Merck.smiles` SMILES file. The fingerprints, computed using the following commands: 
 
@@ -30,7 +30,7 @@ obabel ALMANAC_and_Merck.smiles -ofps -OALMANAC_and_Merck.obable.FP2 -xfFP2
 cat ALMANAC_and_Merck.obable.FP2 | ./expand_fingerprints.pl > ALMANAC_and_Merck.obable.FP2.csv
 ```
 
-are provided in the file `jdacs4c-pilot1/jason/preprocess/ALMANAC_and_Merck.obable.FP2.csv`. The `jdacs4c-pilot1/jason/preprocess/expand_fingerprints.pl` script converts the hex-encoded drug fingerprints into a text-based binary fingerprint (i.e. strings of 1's and 0's).
+are provided in the file `jdacs4c-pilot1/jason/preprocess/ALMANAC_and_Merck.obable.FP2.csv`. The `jdacs4c-pilot1/jason/preprocess/expand_fingerprints.pl` script converts the hex-encoded drug fingerprints into a text-based binary fingerprint (i.e. strings of 1's and 0's). Please note that CID drug IDs are used for both the NCI-ALMANAC and Merck drugs (the NSC drug IDs provide by the NCI are not used).
 
 ### NCI-ALMANAC drug synergy data
   
