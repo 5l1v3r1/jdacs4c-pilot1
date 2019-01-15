@@ -1,18 +1,16 @@
-OBJS = parse_combo.o parse_csv.o io.o dose_response_function.o
+OBJS = random_forest.o io.o parse_csv.o cluster.o options.o \
+	mpi_util.o one_hot.o
 
-CC = g++
-cc = gcc
+CC = mpic++
+cc = mpicc
 
 PROFILE = #-pg -g
 OPENMP = -fopenmp
 
 FLAGS = $(PROFILE) -O3 -Wall $(OPENMP) -std=c++0x
 
-GSL_LIB_DIR = 
-GSL_INCLUDE_DIR = 
-
-INC = -I. -I$(GSL_INCLUDE_DIR)
-LIBS = -lm -lz $(GSL_LIB_DIR)/libgsl.a $(GSL_LIB_DIR)/libgslcblas.a 
+INC = -I. 
+LIBS = -lm -lz
 
 .SUFFIXES : .o .cpp .c
 .cpp.o:
@@ -20,15 +18,11 @@ LIBS = -lm -lz $(GSL_LIB_DIR)/libgsl.a $(GSL_LIB_DIR)/libgslcblas.a
 .c.o:
 	$(cc) $(FLAGS) $(PROFILE) $(INC) -c $<
 
-all: gemini_prep synergy_search
+all: predict_synergy
 
-gemini_prep : $(OBJS) gemini_prep.o
-	$(CC) $(PROFILE) -o gemini_prep gemini_prep.o $(OBJS) $(LIBS) $(OPENMP)
+predict_synergy : $(OBJS) main.o
+	$(CC) $(PROFILE) -o predict_synergy main.o $(OBJS) $(LIBS) $(OPENMP)
 
-
-synergy_search : $(OBJS) synergy_search.o
-	$(CC) $(PROFILE) -o synergy_search synergy_search.o $(OBJS) $(LIBS) $(OPENMP)
-	
 clean:
 	-rm -f *.o
 
