@@ -117,7 +117,7 @@ As mentioned above, the `predict_synergy` program uses MPI to train and test ran
 Running the `./predict_synergy` program with out any command line arguments lists all of the valid command line options:
 
 ```
-Usage predict_synergy version 0.6:
+Usage: predict_synergy version 0.6:
 		[-o <output file>] (default is stdout)
 		[--drug <file of drug features>]
 		[--drug.random (randomize the drug features)]
@@ -154,7 +154,7 @@ Usage predict_synergy version 0.6:
 ## Cross-validation on the NCI-ALMANAC data
 
 An example of using `predict_synergy` to perform five-fold cross validation on the NCI-ALMANAC dataset is provided in the 
-shell script file `acs4c-pilot1/jason/predict/grid_ALMANAC.sh`. Due to the length of time required to train the drug pair-based synergy models, this script was designed to run on a cluster computer made up of 18 servers, with 48, 1.9 GHz cores per server (for a total of 864 cores). Any cluster with a similar number of cores will take approximately 4 days to generate the 25 random cross-validation samples for the following feature vector combinations:
+shell script file `acs4c-pilot1/jason/predict/grid_ALMANAC.sh`. Due to the length of time required to train the drug pair-based synergy models, this script was designed to run on a cluster computer made up of 18 servers, with 48, 1.9 GHz cores per server (for a total of 864 cores). Any cluster with a similar number of cores will take approximately *4 days* to generate the 25 random cross-validation samples for the following feature vector combinations:
 
 * Full cell line and drug features
 * Cell line features only
@@ -168,11 +168,11 @@ The `acs4c-pilot1/jason/predict/grid_ALMANAC.sh` file will need to be edited to 
 The `predict_synergy` produces a rather verbose output file (with a summary of the input data and information about the results of each cross-validation fold). However, the most important information is presented at the very end of the output file. This information includes the Gini coefficients for both the drug pair-based (`Final drug pair-based synergy Gini`) and 
 single drug-based (`Final single drug-based synergy Gini`) synergy models. The additional output information includes the "Area Under the Reciever Operator Curve" (AUROC) and the "enrichment" (a performance metric that is not used in the paper, since it is very similar to the Gini coefficient).
 
-The Mean Squared Error (i.e. `MSE`) information in the output file reports on a parallel effort to directly predict the single drug synergy probability (as a regression problem, rather than the classification problem that is presented in the paper). However, this regression attempt was largely unsuccessfull (although the predicted single drug probabilities do appear to be correlated with the actual probabilities).
+The Mean Squared Error (i.e. `MSE`) information in the output file reports on an effort to directly predict the single drug synergy probability (as a regression problem, rather than the classification problem of predicting drug pair synergy that is presented in the paper). However, this regression attempt was largely unsuccessfull (although the predicted single drug probabilities do appear to be correlated with the actual single drug probabilities).
 
 ## Training on NCI-ALMANAC and testing on Merck
 
-An example of using the `predict_synergy` program to train on the NCI-ALMANAC synergy data and test on the Merck synergy data is provided by the `acs4c-pilot1/jason/predict/batch_ALMANAC_to_Merck.sh` shell script file. Unlike the cross-validation script above, this script is much faster to execute, as it does not perform multiple iterations of cross validation.
+An example of using the `predict_synergy` program to train on the NCI-ALMANAC synergy data and test on the Merck synergy data is provided by the `acs4c-pilot1/jason/predict/batch_ALMANAC_to_Merck.sh` shell script file. Unlike the cross-validation script above, this script is much faster to execute (less than a day on the cluster computer detailed above), as it does not perform multiple iterations of cross validation.
 
 By default, this script uses all of the specified cell lines for testing and training. However, as mentioned in the publication, there are some cell lines that are common to both the NCI-ALMANAC and the Merck datasets. To assign these shared cell lines to the NCI-ALMANAC training set, edit the `batch_ALMANAC_to_Merck.sh` script to add the `--overlap.to_train` flag. Alternatively, to assign these shared cell lines to the Merck testing set, edit the `batch_ALMANAC_to_Merck.sh` script to add the `--overlap.to_test` flag.
 
