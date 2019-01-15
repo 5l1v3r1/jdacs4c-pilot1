@@ -400,7 +400,7 @@ void Options::parse(int argc, char *argv[])
 
 	if(print_usage){
 
-		cerr << "Usage rx version " << RX_VERSION << ":" << endl;
+		cerr << "Usage predict_synergy version " << RX_VERSION << ":" << endl;
 		cerr << "\t\t[-o <output file>] (default is stdout)" << endl;
 		cerr << "\t\t[--drug <file of drug features>]" << endl;
 		cerr << "\t\t[--drug.random (randomize the drug features)]" << endl;
