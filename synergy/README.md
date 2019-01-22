@@ -36,7 +36,7 @@ are provided in the file `jdacs4c-pilot1/synergy/preprocess/ALMANAC_and_Merck.ob
   
 The NCI-ALMANAC drug-pair synergy data is available from [ComboDrugGrowth_Nov2017.zip](https://wiki.nci.nih.gov/download/attachments/338237347/ComboDrugGrowth_Nov2017.zip). 
 
-The first preprocessing step for the NCI-ALMANAC data is to (a) extract the subset of the data that has expression data in CCLE cell line gene expression data set and (b) converting the NSC-based drug ID used by NCI-ALMANAC to the CID-based drug ID used to label the drug features. Both of these steps are performed by the `dacs4c-pilot1/synergy/preprocess/ALMANAC_to_cid_and_CCLE.pl` perl script. This script contains the hard-coded mappings between NSC <-> CID drug ids and the CCLE <-> NCI60 cell line names. The script is run as:
+The first preprocessing step for the NCI-ALMANAC data is to (a) extract the subset of the data that has expression data in CCLE cell line gene expression data set and (b) converting the NSC-based drug ID used by NCI-ALMANAC to the CID-based drug ID used to label the drug features. Both of these steps are performed by the `jdacs4c-pilot1/synergy/preprocess/ALMANAC_to_cid_and_CCLE.pl` perl script. This script contains the hard-coded mappings between NSC <-> CID drug ids and the CCLE <-> NCI60 cell line names. The script is run as:
 
 `ALMANAC_to_cid_and_CCLE.pl ComboDrugGrowth_Nov2017.csv > ComboDrugGrowth_Nov2017.CID.CCLE.csv`
 
@@ -44,9 +44,9 @@ where the output (written to STDOUT) is redirected to a filename you select (I u
 
 The next step of preprocessing the NCI-ALMANAC data is to compute the drug pair synergy values. Since the NCI-ALAMANC data file contains both the single agent and drug pair responses (for the different concentrations tested), parsing and processing this file is somewhat challenging. To manage the parsing complexity, this preprocessing step is performed by a C++ based program called `gemini_prep`. 
 
-However, please note that the `gemini_prep` program requires the [GNU Scientific Library](https://www.gnu.org/software/gsl/), in addition to a C++ compiler (the code has been tested with g++ ver. 4.4.7). After installing the GNU Scientific Library, you will need to edit `acs4c-pilot1/synergy/preprocess/Makefile` to specify the directories that contain the GSL library files (`GSL_LIB_DIR`) and GSL include files (`GSL_INCLUDE_DIR`). If your compiler does not support OpenMP, i.e. you have a Mac with the default clang compiler (as of 2018), then comment out the `-fopenmp` (i.e. `# -fopenmp`) and the program should still compile (but run more slowly, since multi-threading is now disabled). 
+However, please note that the `gemini_prep` program requires the [GNU Scientific Library](https://www.gnu.org/software/gsl/), in addition to a C++ compiler (the code has been tested with g++ ver. 4.4.7). After installing the GNU Scientific Library, you will need to edit `jdacs4c-pilot1/synergy/preprocess/Makefile` to specify the directories that contain the GSL library files (`GSL_LIB_DIR`) and GSL include files (`GSL_INCLUDE_DIR`). If your compiler does not support OpenMP, i.e. you have a Mac with the default clang compiler (as of 2018), then comment out the `-fopenmp` (i.e. `# -fopenmp`) and the program should still compile (but run more slowly, since multi-threading is now disabled). 
 
-The `gemini_prep` is compiled by running the `make` command in the `dacs4c-pilot1/synergy/preprocess` directory. 
+The `gemini_prep` is compiled by running the `make` command in the `jdacs4c-pilot1/synergy/preprocess` directory. 
 
 After you run `make` (which will build both the `gemini_prep` and another program called `synergy_search` that will be described below), you will be able to run the `gemini_prep` command using:
 
@@ -56,7 +56,7 @@ After you run `make` (which will build both the `gemini_prep` and another progra
 	-p ALMANAC_CID_CCLE_
  ```
 
-where the input file (passed as the argument to the `-i` flag) is the output of the `dacs4c-pilot1/synergy/preprocess/ALMANAC_to_cid_and_CCLE.pl` script and the argument to the `-p` flag specifies the output prefix that will be used for all of the output files (i.e. `ALMANAC_CID_CCLE_` in the above example). The `gemini_prep` program will generate a total of six output files (all starting with the specified prefix, i.e. `ALMANAC_CID_CCLE_`):
+where the input file (passed as the argument to the `-i` flag) is the output of the `jdacs4c-pilot1/synergy/preprocess/ALMANAC_to_cid_and_CCLE.pl` script and the argument to the `-p` flag specifies the output prefix that will be used for all of the output files (i.e. `ALMANAC_CID_CCLE_` in the above example). The `gemini_prep` program will generate a total of six output files (all starting with the specified prefix, i.e. `ALMANAC_CID_CCLE_`):
 
 * `ALMANAC_CID_CCLE_bliss_ave_synergy.csv`
 * `ALMANAC_CID_CCLE_bliss_stdev_synergy.csv`
@@ -84,7 +84,7 @@ where the output (written to STDOUT) must be redirected to a filename you specif
 
 ### Extract the per-cell line synergy values for both NCI-ALMANAC and Merck
 
-The final preprocessing step for both the NCI-ALMANAC and the Merck data sets is to extract the synergy values for each cell line as a separate file. This task is performed by the `synergy_search` C++ program that should have been built when the `make` command was run in the `acs4c-pilot1/synergy/preprocess` directory (see the instructions above for the NCI-ALMANAC data). The process of creating the per-cell line drug-pair synergy files is automated by the provided shell script `batch_synergy_search.sh`. This shell script expects to create the output synergy files in two existing directories: `data_bliss/` and `data_loewe/`. If you would like to place these files in a different location, please edit the `OUTPUT_BLISS_DIR` and `OUTPUT_LOEWE_DIR` at the top of the script. This script is run as:
+The final preprocessing step for both the NCI-ALMANAC and the Merck data sets is to extract the synergy values for each cell line as a separate file. This task is performed by the `synergy_search` C++ program that should have been built when the `make` command was run in the `jdacs4c-pilot1/synergy/preprocess` directory (see the instructions above for the NCI-ALMANAC data). The process of creating the per-cell line drug-pair synergy files is automated by the provided shell script `batch_synergy_search.sh`. This shell script expects to create the output synergy files in two existing directories: `data_bliss/` and `data_loewe/`. If you would like to place these files in a different location, please edit the `OUTPUT_BLISS_DIR` and `OUTPUT_LOEWE_DIR` at the top of the script. This script is run as:
 
 `./batch_synergy_sarch.sh`
 
@@ -154,7 +154,7 @@ Usage: predict_synergy version 0.6:
 ## Cross-validation on the NCI-ALMANAC data
 
 An example of using `predict_synergy` to perform five-fold cross validation on the NCI-ALMANAC data set is provided in the 
-shell script file `acs4c-pilot1/synergy/predict/grid_ALMANAC.sh`. Due to the length of time required to train the drug pair-based synergy models, this script was designed to run on a cluster computer made up of 18 servers, with 48, 1.9 GHz cores per server (for a total of 864 cores). Any cluster with a similar number of cores will take approximately *4 days* to generate the 25 random cross-validation samples for the following feature vector combinations:
+shell script file `jdacs4c-pilot1/synergy/predict/grid_ALMANAC.sh`. Due to the length of time required to train the drug pair-based synergy models, this script was designed to run on a cluster computer made up of 18 servers, with 48, 1.9 GHz cores per server (for a total of 864 cores). Any cluster with a similar number of cores will take approximately *4 days* to generate the 25 random cross-validation samples for the following feature vector combinations:
 
 * Full cell line and drug features
 * Cell line features only
@@ -163,7 +163,7 @@ shell script file `acs4c-pilot1/synergy/predict/grid_ALMANAC.sh`. Due to the len
 * Drug features only
 * No cell features and no drug features (as a negative control)
 
-The `acs4c-pilot1/synergy/predict/grid_ALMANAC.sh` file will need to be edited to adapt it to the local computing environment and to select between the Bliss and the Loewe synergy data.
+The `jdacs4c-pilot1/synergy/predict/grid_ALMANAC.sh` file will need to be edited to adapt it to the local computing environment and to select between the Bliss and the Loewe synergy data.
 
 The `predict_synergy` produces a rather verbose output file (with a summary of the input data and information about the results of each cross-validation fold). However, the most important information is presented at the very end of the output file. This information includes the Gini coefficients for both the drug pair-based (`Final drug pair-based synergy Gini`) and 
 single drug-based (`Final single drug-based synergy Gini`) synergy models. The additional output information includes the "Area Under the Receiver Operator Curve" (AUROC) and the "enrichment" (a performance metric that is not used in the paper, since it is very similar to the Gini coefficient).
@@ -172,7 +172,7 @@ The Mean Squared Error (i.e. `MSE`) information in the output file reports on an
 
 ## Training on NCI-ALMANAC and testing on Merck
 
-An example of using the `predict_synergy` program to train on the NCI-ALMANAC synergy data and test on the Merck synergy data is provided by the `acs4c-pilot1/synergy/predict/batch_ALMANAC_to_Merck.sh` shell script file. Unlike the cross-validation script above, this script is much faster to execute (less than a day on the cluster computer detailed above), as it does not perform multiple iterations of cross validation.
+An example of using the `predict_synergy` program to train on the NCI-ALMANAC synergy data and test on the Merck synergy data is provided by the `jdacs4c-pilot1/synergy/predict/batch_ALMANAC_to_Merck.sh` shell script file. Unlike the cross-validation script above, this script is much faster to execute (less than a day on the cluster computer detailed above), as it does not perform multiple iterations of cross validation.
 
 By default, this script uses all of the specified cell lines for testing and training. However, as mentioned in the publication, there are some cell lines that are common to both the NCI-ALMANAC and the Merck data sets. To assign these shared cell lines to the NCI-ALMANAC training set, edit the `batch_ALMANAC_to_Merck.sh` script to add the `--overlap.to_train` flag. Alternatively, to assign these shared cell lines to the Merck testing set, edit the `batch_ALMANAC_to_Merck.sh` script to add the `--overlap.to_test` flag.
 
