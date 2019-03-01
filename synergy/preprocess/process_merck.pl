@@ -2,35 +2,35 @@
 
 # Copyright (c) 2018 Los Alamos National Security, LLC.
 # All rights reserved.
-# 
-# Copyright 2018. Los Alamos National Security, LLC. This software was produced under U.S. Government 
-# contract DE-AC52-06NA25396 for Los Alamos National Laboratory (LANL), which is operated by Los Alamos 
-# National Security, LLC for the U.S. Department of Energy. The U.S. Government has rights to use, 
-# reproduce, and distribute this software.  NEITHER THE GOVERNMENT NOR LOS ALAMOS NATIONAL SECURITY, LLC 
-# MAKES ANY WARRANTY, EXPRESS OR IMPLIED, OR ASSUMES ANY LIABILITY FOR THE USE OF THIS SOFTWARE.  If 
-# software is modified to produce derivative works, such modified software should be clearly marked, so 
+#
+# Copyright 2018. Los Alamos National Security, LLC. This software was produced under U.S. Government
+# contract DE-AC52-06NA25396 for Los Alamos National Laboratory (LANL), which is operated by Los Alamos
+# National Security, LLC for the U.S. Department of Energy. The U.S. Government has rights to use,
+# reproduce, and distribute this software.  NEITHER THE GOVERNMENT NOR LOS ALAMOS NATIONAL SECURITY, LLC
+# MAKES ANY WARRANTY, EXPRESS OR IMPLIED, OR ASSUMES ANY LIABILITY FOR THE USE OF THIS SOFTWARE.  If
+# software is modified to produce derivative works, such modified software should be clearly marked, so
 # as not to confuse it with the version available from LANL.
-# 
-# This work has been supported in part by the Joint Design of Advanced Computing Solutions for Cancer 
-# (JDACS4C) program established by the U.S. Department of Energy (DOE) and the National Cancer Institute 
-# (NCI) of the National Institutes of Health. 
-# 
-# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and 
-# associated documentation files (the "Software"), to deal in the Software without restriction, including 
-# without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-# copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to 
-# the following conditions: 
-# 
-# The above copyright notice and this permission notice shall be included in all copies or substantial 
+#
+# This work has been supported in part by the Joint Design of Advanced Computing Solutions for Cancer
+# (JDACS4C) program established by the U.S. Department of Energy (DOE) and the National Cancer Institute
+# (NCI) of the National Institutes of Health.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+# associated documentation files (the "Software"), to deal in the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to
+# the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all copies or substantial
 # portions of the Software.
-# 
-# THIS SOFTWARE IS PROVIDED BY LOS ALAMOS NATIONAL SECURITY, LLC AND CONTRIBUTORS "AS IS" AND ANY EXPRESS 
-# OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
-# FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL LOS ALAMOS NATIONAL SECURITY, LLC OR 
+#
+# THIS SOFTWARE IS PROVIDED BY LOS ALAMOS NATIONAL SECURITY, LLC AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+# OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+# FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL LOS ALAMOS NATIONAL SECURITY, LLC OR
 # CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; 
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
 # OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 # Author: Jason D. Gans (jgans@lanl.gov)
@@ -41,7 +41,7 @@
 #
 # 1) Map Merck drug names to their corresponding drug CID values
 # 1.5) Interpolate growth values using the log(concentration).
-# 2) Compute synergy using the Bliss independence model (for now, the 
+# 2) Compute synergy using the Bliss independence model (for now, the
 #    Loewe synergy definition will have to wait).
 # 3) Define synergy as: (observed growth) - (expected growth)
 # 4) Return the minimum synergy for each drug combination and cell line
@@ -52,8 +52,8 @@
 # clear if these should be clamped to be <= 1 (values are not currently clamped).
 
 # According to the Merck study ("An Unbiased Oncology Compound Screen to Identify Novel Combination Strategies", O'Niel et al.,
-# Mol Cancer Ther. 2016 Jun;15(6):1155-62. doi: 10.1158/1535-7163.MCT-15-0843. Epub 2016 Mar 16.) 
-# "The screen was conducted in 3 batches in terms of cell line growth and drug batches. Batch 1 & 2 are part of the primary 
+# Mol Cancer Ther. 2016 Jun;15(6):1155-62. doi: 10.1158/1535-7163.MCT-15-0843. Epub 2016 Mar 16.)
+# "The screen was conducted in 3 batches in terms of cell line growth and drug batches. Batch 1 & 2 are part of the primary
 # large screen while batch 3 is a partial repeat of selected drugs and served as a validation screen".
 # For only, only include batch 1 and batch 2.
 
@@ -68,6 +68,10 @@
 #		COLO320DM (Merck) --> COLO320 (CCLE)
 #		EFM192B (Merck) --> EFM192A (CCLE)
 #
+# Updated March 1, 2019
+#   * Modified file parser to accept both CSV and UTF-8 CSV files exported from Excel
+#     without the need to manually edit the CSV files.
+#   * Drug and cell names in the output file are now in sorted in ascending order.
 
 use Cwd;
 use Getopt::Long;
@@ -201,7 +205,7 @@ my $usage = "USAGE: $0\n" .
 	"\t--single <Merck single agent CSV data file>\n" .
 	"\t--pair <Merck combination response CSV data file>\n" .
 	"\t[-h|-?|--help] (print usage)\n";
-	
+
 sub main()
 {
 	if($opt_help){
@@ -230,7 +234,7 @@ sub main()
 	
 	# Set to 1 to use abs(viability), otherwise some of the pairwise viability values that are
 	# slightly below 0.0 will be kept as negative numbers.
-	my $clamp_viability = 0; 
+	my $clamp_viability = 0;
 	
 	if($use_viability && $use_gi){
 		die "Please select 'use_viability' or 'use_gi', but not both!\n";
@@ -273,7 +277,12 @@ sub main()
 		die "Error reading header from $INPUT\n";
 	}
 	
-	chomp($line);
+	# If the user has exported the excel file as UTF-8, then there will be a single
+    	# special character at the start of the file (a "byte mark"). We will attempt
+    	# to remove this character (as a precationary step) by removing *all*
+    	# non-ASCII characters. Also remove the DOS carriage return
+    	$line =~ tr/\x00-\x7F//cd;
+   	 $line =~ tr/\r\n//d;
 	
 	my @header = split /,/, $line;
 	
@@ -281,7 +290,10 @@ sub main()
 	my $batch_col = get_column_index(\@header, "BatchID");
 	my $drug_col = get_column_index(\@header, "drug_name");
 	my $cell_line_col = get_column_index(\@header, "cell_line");
-	my $conc_col = get_column_index(\@header, "Drug_concentration (uM)");
+    
+    	# Note that the wild-card in front of 'M' is to handle the ASCII 'u'
+    	# or (UTF-8) greek mu symbol (which depends on the formate of the input file)
+	my $conc_col = get_column_index(\@header, 'Drug_concentration \(.*M\)');
 	my $viability1_col = get_column_index(\@header, "viability1");
 	my $viability2_col = get_column_index(\@header, "viability2");
 	my $viability3_col = get_column_index(\@header, "viability3");
@@ -302,7 +314,8 @@ sub main()
 		
 		++$line_number;
 		
-		chomp($line);
+		# Like chomp($line), but remove any DOS \r characters as well.
+		$line =~ tr/\n\r//d;
 		
 		my @data = split /,/, $line;
 		
@@ -458,8 +471,13 @@ sub main()
 		die "Error reading header from $INPUT\n";
 	}
 	
-	chomp($line);
-	
+	# If the user has exported the excel file as UTF-8, then there will be a single
+	# special character at the start of the file (a "byte mark"). We will attempt
+	# to remove this character (as a precationary step) by removing *all* 
+	# non-ASCII characters. Also remove the DOS carriage return
+	$line =~ tr/\x00-\x7F//cd;
+	$line =~ tr/\r\n//d;
+
 	@header = split /,/, $line;
 	
 	# Extract the column ids
@@ -467,8 +485,12 @@ sub main()
 	my $drug_A_col = get_column_index(\@header, "drugA_name");
 	my $drug_B_col = get_column_index(\@header, "drugB_name");
 	$cell_line_col = get_column_index(\@header, "cell_line");
-	my $conc_A_col = get_column_index(\@header, "drugA Conc (uM)");
-	my $conc_B_col = get_column_index(\@header, "drugB Conc (uM)");
+    
+    	# Note that the wild-card in front of 'M' is to handle the ASCII 'u'
+    	# or (UTF-8) greek mu symbol (which depends on the formate of the input file)
+	my $conc_A_col = get_column_index(\@header, 'drugA Conc \(.*M\)');
+	my $conc_B_col = get_column_index(\@header, 'drugB Conc \(.*M\)');
+    
 	$viability1_col = get_column_index(\@header, "viability1");
 	$viability2_col = get_column_index(\@header, "viability2");
 	$viability3_col = get_column_index(\@header, "viability3");
@@ -489,7 +511,8 @@ sub main()
 		
 		++$line_number;
 		
-		chomp($line);
+		# Like chomp($line), but remove any DOS \r as well ...
+		$line =~ tr/\n\r//d;
 		
 		my @data = split /,/, $line;
 		
@@ -646,7 +669,7 @@ sub main()
 	close($INPUT);
 	
 	# Extract all of the drug A names
-	my @valid_drug_A = keys(%pair_data);
+	my @valid_drug_A = sort keys(%pair_data);
 	
 	##########################################################################
 	# Normalize the pair drug data
@@ -684,7 +707,7 @@ sub main()
 		}
 	}
 	
-	my @cell_line_names = keys(%all_cells);
+	my @cell_line_names = sort keys(%all_cells);
 	
 	print STDERR "Found " . scalar(@cell_line_names) . " Merck cell line names\n";
 	
@@ -740,7 +763,7 @@ sub main()
 	
 	DRUG_A: foreach my $drug_A (@valid_drug_A){
 		
-		my @valid_drug_B = keys(%{$pair_data{$drug_A}});
+		my @valid_drug_B = sort keys(%{$pair_data{$drug_A}});
 		
 		#if( !defined($complete_drugs{$drug_A}) ){
 		#	next DRUG_A;
@@ -953,7 +976,7 @@ sub get_column_index($$)
 	
 	for(my $i = 0;$i < $num_col;++$i){
 		
-		if(${$header}[$i] eq $query){
+		if(${$header}[$i] =~ /^$query$/){
 			return $i;
 		}
 	}
