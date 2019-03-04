@@ -86,7 +86,7 @@ where the output (written to STDOUT) must be redirected to a filename you specif
 
 The final preprocessing step for both the NCI-ALMANAC and the Merck data sets is to extract the synergy values for each cell line as a separate file. This task is performed by the `synergy_search` C++ program that should have been built when the `make` command was run in the `jdacs4c-pilot1/synergy/preprocess` directory (see the instructions above for the NCI-ALMANAC data). The process of creating the per-cell line drug-pair synergy files is automated by the provided shell script `batch_synergy_search.sh`. This shell script expects to create the output synergy files in two existing directories: `data_bliss/` and `data_loewe/`. If you would like to place these files in a different location, please edit the `OUTPUT_BLISS_DIR` and `OUTPUT_LOEWE_DIR` at the top of the script. This script is run as:
 
-`./batch_synergy_sarch.sh`
+`./batch_synergy_search.sh`
 
 and no command line arguments are specified. Successful completion of the script will be accompanied by the creation of numerous files, i.e.:
 
