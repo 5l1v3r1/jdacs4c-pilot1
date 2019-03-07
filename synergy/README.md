@@ -34,7 +34,7 @@ are provided in the file `jdacs4c-pilot1/synergy/preprocess/ALMANAC_and_Merck.ob
 
 ### NCI-ALMANAC drug synergy data
   
-The NCI-ALMANAC drug-pair synergy data is available from [ComboDrugGrowth_Nov2017.zip](https://wiki.nci.nih.gov/download/attachments/338237347/ComboDrugGrowth_Nov2017.zip). 
+The NCI-ALMANAC drug-pair synergy data is available from [ComboDrugGrowth_Nov2017.zip](https://wiki.nci.nih.gov/download/attachments/338237347/ComboDrugGrowth_Nov2017.zip). Unzip this file to extract `ComboDrugGrowth_Nov2017.csv`.
 
 The first preprocessing step for the NCI-ALMANAC data is to (a) extract the subset of the data that has expression data in CCLE cell line gene expression data set and (b) converting the NSC-based drug ID used by NCI-ALMANAC to the CID-based drug ID used to label the drug features. Both of these steps are performed by the `jdacs4c-pilot1/synergy/preprocess/ALMANAC_to_cid_and_CCLE.pl` perl script. This script contains the hard-coded mappings between NSC <-> CID drug ids and the CCLE <-> NCI60 cell line names. The script is run as:
 
@@ -68,7 +68,7 @@ where the input file (passed as the argument to the `-i` flag) is the output of 
 The required synergy for training and testing machine learning models is contained in two of these files:
 
 * `ALMANAC_CID_CCLE_bliss_ave_synergy.csv` for the Bliss synergy model
-* `ALMANAC_CID_CCLE_loewe_ave_synergy.csv` for the Loewew synergy model
+* `ALMANAC_CID_CCLE_loewe_ave_synergy.csv` for the Loewe synergy model
 
 These files contain the average (over replicate experiments) minimum synergy (i.e. most synergistic over all tested concentrations).
 
